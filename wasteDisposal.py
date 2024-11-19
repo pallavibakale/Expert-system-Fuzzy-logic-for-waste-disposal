@@ -10,7 +10,7 @@ fullness = ctrl.Antecedent(np.arange(0, 101, 1), 'fullness')
 toxicity = ctrl.Antecedent(np.arange(0, 101, 1), 'toxicity')
 moisture = ctrl.Antecedent(np.arange(0, 101, 1), 'moisture')
 odor = ctrl.Antecedent(np.arange(0, 101, 1), 'odor')
-weather = ctrl.Antecedent(np.arange(0, 101, 1), 'weather')
+weather = ctrl.Antecedent(np.arange(0, 101, 1), 'weather') 
 
 # Output
 urgency = ctrl.Consequent(np.arange(0, 101, 1), 'urgency')
@@ -24,11 +24,14 @@ toxicity['low'] = fuzz.trimf(toxicity.universe, [0, 0, 50])
 toxicity['medium'] = fuzz.trimf(toxicity.universe, [20, 50, 80])
 toxicity['high'] = fuzz.trimf(toxicity.universe, [50, 100, 100])
 
-moisture['low'] = fuzz.trimf(moisture.universe, [0, 0, 50])
-moisture['medium'] = fuzz.trimf(moisture.universe, [20, 50, 80])
-moisture['high'] = fuzz.trimf(moisture.universe, [50, 100, 100])
+# Expanded moisture categories
+moisture['dry'] = fuzz.trimf(moisture.universe, [0, 0, 20])
+moisture['slightly_moist'] = fuzz.trimf(moisture.universe, [10, 25, 40])
+moisture['moderate'] = fuzz.trimf(moisture.universe, [30, 50, 70])
+moisture['wet'] = fuzz.trimf(moisture.universe, [60, 75, 90])
+moisture['saturated'] = fuzz.trimf(moisture.universe, [80, 100, 100])
 
-# Odor categories
+# Expanded odor categories
 odor['none'] = fuzz.trimf(odor.universe, [0, 0, 20])
 odor['mild'] = fuzz.trimf(odor.universe, [10, 25, 40])
 odor['moderate'] = fuzz.trimf(odor.universe, [30, 50, 70])
@@ -49,24 +52,50 @@ urgency['low'] = fuzz.trimf(urgency.universe, [0, 0, 50])
 urgency['medium'] = fuzz.trimf(urgency.universe, [20, 50, 80])
 urgency['high'] = fuzz.trimf(urgency.universe, [50, 100, 100])
 
-# Step 3: Define rules
-rule1 = ctrl.Rule(fullness['high'] & odor['very_strong'] & weather['stormy'], urgency['high'])
-rule2 = ctrl.Rule(fullness['medium'] & (toxicity['high'] | moisture['high']) & weather['rainy'], urgency['medium'])
-rule3 = ctrl.Rule(fullness['low'] & odor['none'] & weather['clear'], urgency['low'])
-rule4 = ctrl.Rule((moisture['medium'] | toxicity['medium']) & fullness['medium'] & weather['cloudy'], urgency['medium'])
-rule5 = ctrl.Rule(odor['strong'] & (fullness['high'] | toxicity['high']) & weather['hot'], urgency['high'])
-rule6 = ctrl.Rule(fullness['high'] & moisture['high'] & odor['moderate'] & weather['humid'], urgency['high'])
-rule7 = ctrl.Rule(toxicity['high'] & odor['very_strong'] & weather['stormy'], urgency['high'])
-rule8 = ctrl.Rule(odor['very_strong'] & moisture['high'] & weather['humid'], urgency['high'])
-rule9 = ctrl.Rule(fullness['medium'] & odor['moderate'] & toxicity['medium'] & weather['cold'], urgency['medium'])
-rule10 = ctrl.Rule(fullness['low'] & odor['strong'] & weather['rainy'], urgency['medium'])
+# Step 3: Define rules considering the expanded weather and odor variable
+
+# High urgency when the bin is full, has a strong odor, and extreme weather conditions
+rule1 = ctrl.Rule(fullness['high'] & odor['very_strong'] & moisture['saturated'] & weather['stormy'], urgency['high'])
+rule2 = ctrl.Rule(fullness['high'] & (odor['strong'] | toxicity['high']) & moisture['wet'] & weather['hot'], urgency['high'])
+rule3 = ctrl.Rule(odor['very_strong'] & toxicity['high'] & weather['humid'] & moisture['moderate'], urgency['high'])
+
+# Moderate urgency when the bin is moderately full, with noticeable odor and unfavorable weather
+rule4 = ctrl.Rule(fullness['medium'] & odor['moderate'] & moisture['moderate'] & (weather['rainy'] | weather['cloudy']), urgency['medium'])
+rule5 = ctrl.Rule(odor['strong'] & (moisture['wet'] | toxicity['medium']) & fullness['medium'] & weather['cold'], urgency['medium'])
+rule6 = ctrl.Rule((moisture['moderate'] | odor['moderate']) & toxicity['high'] & fullness['medium'] & weather['humid'], urgency['medium'])
+
+# Low urgency for bins that are not full, with minimal odor and favorable weather conditions
+rule7 = ctrl.Rule(fullness['low'] & odor['none'] & moisture['dry'] & weather['clear'], urgency['low'])
+rule8 = ctrl.Rule(fullness['low'] & odor['mild'] & (moisture['slightly_moist'] | moisture['dry']) & weather['clear'], urgency['low'])
+
+# Considerations for specific weather conditions
+rule9 = ctrl.Rule(odor['moderate'] & moisture['saturated'] & weather['stormy'], urgency['high'])
+rule10 = ctrl.Rule(odor['mild'] & moisture['slightly_moist'] & weather['cloudy'], urgency['low'])
+rule11 = ctrl.Rule(odor['strong'] & moisture['moderate'] & weather['rainy'], urgency['medium'])
+rule12 = ctrl.Rule(moisture['wet'] & fullness['high'] & weather['rainy'], urgency['high'])
+rule13 = ctrl.Rule(odor['very_strong'] & moisture['wet'] & (weather['hot'] | weather['humid']), urgency['high'])
+
+# Additional rules for special cases
+rule14 = ctrl.Rule(fullness['medium'] & moisture['dry'] & odor['moderate'] & weather['cold'], urgency['low'])
+rule15 = ctrl.Rule(fullness['low'] & moisture['saturated'] & weather['rainy'], urgency['medium'])
+rule16 = ctrl.Rule((toxicity['medium'] | odor['moderate']) & moisture['wet'] & weather['humid'], urgency['high'])
+rule17 = ctrl.Rule(odor['none'] & moisture['dry'] & weather['cold'], urgency['low'])
+rule18 = ctrl.Rule(fullness['medium'] & moisture['slightly_moist'] & weather['humid'], urgency['medium'])
+rule19 = ctrl.Rule(odor['moderate'] & moisture['saturated'] & fullness['medium'], urgency['high'])
+rule20 = ctrl.Rule(odor['none'] & toxicity['low'] & moisture['dry'] & weather['clear'], urgency['low'])
+
 
 # Add a default rule to cover all scenarios
-rule_default = ctrl.Rule(~fullness['low'] | ~toxicity['low'] | ~moisture['low'] | ~odor['none'], urgency['low'])
+rule_default = ctrl.Rule(~fullness['low'] | ~toxicity['low'] | ~moisture['dry'] | ~odor['none'], urgency['low'])
 
 # Create control system and simulation
-waste_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10, rule_default])
+waste_ctrl = ctrl.ControlSystem([
+    rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10,
+    rule11, rule12, rule13, rule14, rule15, rule16, rule17, rule18, rule19, rule20, rule_default
+])
+
 waste_sim = ctrl.ControlSystemSimulation(waste_ctrl)
+
 
 # Step 4: Plot membership functions with proper labels
 def plot_membership_functions():
@@ -119,7 +148,9 @@ def test_waste_management(fullness_level, toxicity_level, moisture_level, odor_l
 plot_membership_functions()
 
 # Step 7: Run test cases
-test_waste_management(80, 40, 60, 70, 80)  # Test with hot weather
-test_waste_management(50, 20, 30, 40, 10)  # Test with clear weather
-test_waste_management(90, 90, 80, 85, 95)  # Test with stormy weather
-test_waste_management(30, 60, 50, 70, 40)  # Test with cold weather
+test_waste_management(85, 60, 95, 90, 85)  # Saturated moisture, very strong odor, and hot weather
+test_waste_management(30, 10, 20, 5, 10)   # Dry conditions, low odor, and clear weather
+test_waste_management(70, 80, 60, 70, 75)  # Wet moisture, strong odor, and humid weather
+test_waste_management(40, 50, 30, 20, 35)  # Slightly moist with moderate odor in cold weather
+test_waste_management(95, 85, 85, 80, 90)  # Very high fullness, high toxicity, and stormy weather
+
