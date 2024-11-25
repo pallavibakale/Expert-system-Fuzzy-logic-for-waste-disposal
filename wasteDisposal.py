@@ -10,7 +10,7 @@ fullness = ctrl.Antecedent(np.arange(0, 101, 1), 'fullness')
 toxicity = ctrl.Antecedent(np.arange(0, 101, 1), 'toxicity')
 moisture = ctrl.Antecedent(np.arange(0, 101, 1), 'moisture')
 odor = ctrl.Antecedent(np.arange(0, 101, 1), 'odor')
-weather = ctrl.Antecedent(np.arange(0, 101, 1), 'weather') 
+weather = ctrl.Antecedent(np.arange(0, 101, 1), 'weather')
 
 # Output
 urgency = ctrl.Consequent(np.arange(0, 101, 1), 'urgency')
@@ -20,7 +20,7 @@ fullness['low'] = fuzz.trimf(fullness.universe, [0, 0, 50])
 fullness['medium'] = fuzz.trimf(fullness.universe, [20, 50, 80])
 fullness['high'] = fuzz.trimf(fullness.universe, [50, 100, 100])
 
-# toxicity categories
+# Expanded toxicity categories
 toxicity['none'] = fuzz.trimf(toxicity.universe, [0, 0, 10])
 toxicity['mild'] = fuzz.trimf(toxicity.universe, [5, 15, 30])
 toxicity['moderate'] = fuzz.trimf(toxicity.universe, [20, 35, 50])
@@ -29,21 +29,21 @@ toxicity['very_high'] = fuzz.trimf(toxicity.universe, [60, 75, 90])
 toxicity['severe'] = fuzz.trimf(toxicity.universe, [80, 100, 100])
 
 
-# moisture categories
+# Expanded moisture categories
 moisture['dry'] = fuzz.trimf(moisture.universe, [0, 0, 20])
 moisture['slightly_moist'] = fuzz.trimf(moisture.universe, [10, 25, 40])
 moisture['moderate'] = fuzz.trimf(moisture.universe, [30, 50, 70])
 moisture['wet'] = fuzz.trimf(moisture.universe, [60, 75, 90])
 moisture['saturated'] = fuzz.trimf(moisture.universe, [80, 100, 100])
 
-# odor categories
+# Expanded odor categories
 odor['none'] = fuzz.trimf(odor.universe, [0, 0, 20])
 odor['mild'] = fuzz.trimf(odor.universe, [10, 25, 40])
 odor['moderate'] = fuzz.trimf(odor.universe, [30, 50, 70])
 odor['strong'] = fuzz.trimf(odor.universe, [60, 75, 90])
 odor['very_strong'] = fuzz.trimf(odor.universe, [80, 100, 100])
 
-# weather categories
+# Expanded weather categories
 weather['clear'] = fuzz.trimf(weather.universe, [0, 0, 20])
 weather['cloudy'] = fuzz.trimf(weather.universe, [10, 30, 50])
 weather['rainy'] = fuzz.trimf(weather.universe, [30, 50, 70])
@@ -57,7 +57,7 @@ urgency['low'] = fuzz.trimf(urgency.universe, [0, 0, 50])
 urgency['medium'] = fuzz.trimf(urgency.universe, [20, 50, 80])
 urgency['high'] = fuzz.trimf(urgency.universe, [50, 100, 100])
 
-# Step 3: Define rules
+# Step 3: Define rules considering the expanded weather and odor variable
 
 # Adjusted and additional rules to accommodate expanded inputs
 rule1 = ctrl.Rule(fullness['high'] & odor['very_strong'] & weather['stormy'] & toxicity['severe'], urgency['high'])
@@ -108,7 +108,7 @@ waste_sim = ctrl.ControlSystemSimulation(waste_ctrl)
 def plot_membership_functions():
     inputs = [fullness, toxicity, moisture, odor, weather, urgency]
     titles = ['Fullness', 'Toxicity', 'Moisture', 'Odor', 'Weather', 'Urgency to Empty']
-    
+
     for i, variable in enumerate(inputs):
         plt.figure()
         variable.view()
@@ -155,8 +155,8 @@ def test_waste_management(fullness_level, toxicity_level, moisture_level, odor_l
 plot_membership_functions()
 
 # Step 7: Run test cases
-test_waste_management(85, 70, 95, 80, 90)   
+test_waste_management(85, 70, 95, 80, 90)
 test_waste_management(20, 10, 15, 5, 10)
-test_waste_management(70, 85, 60, 70, 75) 
-test_waste_management(95, 95, 85, 90, 100) 
+test_waste_management(70, 85, 60, 70, 75)
+test_waste_management(95, 95, 85, 90, 100)
 test_waste_management(10, 0, 10, 0, 0)
