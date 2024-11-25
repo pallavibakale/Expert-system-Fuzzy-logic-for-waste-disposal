@@ -91,6 +91,15 @@ rule28 = ctrl.Rule(odor['mild'] & fullness['medium'] & moisture['slightly_moist'
 rule29 = ctrl.Rule(fullness['medium'] & moisture['dry'] & odor['none'] & weather['clear'], urgency['low'])
 rule30 = ctrl.Rule(fullness['high'] & (moisture['wet'] | moisture['saturated']) & weather['hot'] & toxicity['high'], urgency['high'])
 rule31 = ctrl.Rule((fullness['low'] | fullness['medium']) & moisture['wet'] & weather['humid'], urgency['medium'])
+rule32 = ctrl.Rule(odor['mild'] & fullness['low'] & (moisture['dry'] | weather['clear']), urgency['low'])
+rule33 = ctrl.Rule(odor['strong'] & fullness['medium'] & (toxicity['moderate'] | weather['humid']), urgency['medium'])
+rule34 = ctrl.Rule(fullness['low'] & toxicity['none'] & moisture['slightly_moist'] & odor['mild'], urgency['low'])
+rule35 = ctrl.Rule(weather['cold'] & fullness['medium'] & odor['mild'], urgency['medium'])
+rule36 = ctrl.Rule(fullness['high'] & weather['hot'] & odor['very_strong'], urgency['high'])
+rule37 = ctrl.Rule(weather['rainy'] & moisture['wet'] & fullness['medium'], urgency['medium'])
+rule38 = ctrl.Rule(odor['moderate'] & moisture['saturated'] & fullness['low'], urgency['medium'])
+rule39 = ctrl.Rule(fullness['high'] & (odor['none'] | moisture['slightly_moist']) & weather['clear'], urgency['low'])
+rule40 = ctrl.Rule(moisture['moderate'] & odor['moderate'] & fullness['medium'] & weather['cloudy'], urgency['medium'])
 
 
 # Add a comprehensive fallback rule to cover all remaining cases
@@ -100,7 +109,8 @@ rule_default = ctrl.Rule(~fullness['high'] & ~toxicity['severe'] & ~moisture['sa
 waste_ctrl = ctrl.ControlSystem([
     rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10,
     rule11, rule12, rule13, rule14, rule15, rule16, rule17, rule18, rule19, rule20,
-    rule21, rule22, rule23, rule_default
+    rule21, rule22, rule23, rule24, rule25, rule26, rule27, rule28, rule29, rule30,
+    rule31, rule32, rule33, rule34, rule35, rule36, rule37, rule38, rule39, rule40, rule_default
 ])
 waste_sim = ctrl.ControlSystemSimulation(waste_ctrl)
 
